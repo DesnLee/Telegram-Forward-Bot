@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mongoose": "^6.0.14",
+    "node-telegram-bot-api": "^0.54.0"
+  }
+}
