@@ -22,6 +22,8 @@ npm install
 
 ## Config
 
+#### in ./config.js
+
 ```js
 // in config.js, you need to edit following lines
 
