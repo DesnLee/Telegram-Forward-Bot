@@ -48,8 +48,6 @@ node bot
 
 ## Usage
 
-### Reply a forwarded message
-
 - You can reply to the forwarded message to reply to the original message, currently supports text, stickers, photos.
 - Replying to a forwarded message `!ban` or `!unban` will add/remove someone to the blacklist, and when someone is blacklisted, the bot will not forward his/her messages to you.
 
