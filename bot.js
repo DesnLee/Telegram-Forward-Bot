@@ -56,7 +56,15 @@ bot.on('message', async receivedMsg => {
 
         // 忽略黑名单用户消息
         const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
-        if (fromUser.is_banned) return
+        if (fromUser && fromUser.is_banned) {
+            bot.sendMessage(receivedMsg.chat.id, '你已被封禁，将不再转发你的消息', opt)
+                .catch(e => console.log('send command warn ERROR:\n', e))
+            return
+        } else if (!fromUser) {
+            bot.sendMessage(receivedMsg.chat.id, '请先发送 /start', opt)
+                .catch(e => console.log('send command warn ERROR:\n', e))
+            return
+        }
 
         // 处理自己命令
         if (receivedMsg.text.indexOf('!') === 0 && receivedMsg.from.id === ENV.ME) {
