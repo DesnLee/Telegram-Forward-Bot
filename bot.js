@@ -31,7 +31,7 @@ bot.on('message', async receivedMsg => {
 
     // 忽略黑名单用户消息
     const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
-    if (fromUser.is_banned) return
+    if (fromUser.is_banned && receivedMsg.text !== '/start') return
 
     // 文字命令消息逻辑
     if (receivedMsg.text) {
