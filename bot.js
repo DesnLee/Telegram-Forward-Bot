@@ -29,10 +29,6 @@ bot.on('message', async receivedMsg => {
     // 忽略非私聊消息
     if (receivedMsg.chat.type !== 'private') return
 
-    // 忽略黑名单用户消息
-    const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
-    if (fromUser.is_banned && receivedMsg.text !== '/start') return
-
     // 文字命令消息逻辑
     if (receivedMsg.text) {
 
@@ -57,6 +53,10 @@ bot.on('message', async receivedMsg => {
             }
             return
         }
+
+        // 忽略黑名单用户消息
+        const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
+        if (fromUser.is_banned) return
 
         // 处理自己命令
         if (receivedMsg.text.indexOf('!') === 0 && receivedMsg.from.id === ENV.ME) {
