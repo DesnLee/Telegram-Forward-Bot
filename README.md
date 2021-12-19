@@ -2,7 +2,7 @@
 
 <div align="center">
 
-Telegram-Forward-Bot built with Node.js based on [Node-Telegram-Bot-API](https://telegram.me/node_telegram_bot_api)
+Telegram-Forward-Bot built with Node.js based on [Node-Telegram-Bot-API](https://github.com/yagop/node-telegram-bot-api)
 
 This project relies on [Node.js](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions) and [MongoDB](https://docs.mongodb.com/manual/administration/install-community/), so if you don't have both of these installed, please first install.
 
