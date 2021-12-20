@@ -10,11 +10,6 @@ const bot = new TelegramBot(ENV.BOT_TOKEN, {polling: true})
 require("mongoose").connect('mongodb://127.0.0.1:27017/ForwardBotDB')
 require("mongoose").connection.on('error', console.error.bind(console, 'MongoDB 连接错误：'))
 
-
-if (!ENV.ME) {
-    throw `config ERROR: 请在 config.js 中填写使用者数字ID`
-}
-
 bot.on("polling_error", console.log)
 bot.sendMessage(ENV.ME, '私聊助手开始运行！')
     .catch(e => console.log('send start message ERROR:\n', e))
@@ -29,40 +24,37 @@ bot.on('message', async receivedMsg => {
     // 忽略非私聊消息
     if (receivedMsg.chat.type !== 'private') return
 
+    // 拦截黑名单用户消息，未入库用户录入数据库
+    const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
+    if (fromUser) {
+        if (fromUser.is_banned) {
+            bot.sendMessage(receivedMsg.chat.id, '你已被封禁，将不再转发你的消息', opt)
+                .catch(e => console.log('send command warn ERROR:\n', e))
+            return
+        }
+    } else {
+        new mongo.User({
+            tg_id: receivedMsg.from.id,
+            first_name: receivedMsg.from.first_name,
+        }).save()
+    }
+
+
     // 文字命令消息逻辑
-    if (receivedMsg.text) {
+    if (receivedMsg.text && /^[\/!].*$/g.test(receivedMsg.text)) {
 
         // 处理用户命令
         if (receivedMsg.text.indexOf('/') === 0) {
             switch (receivedMsg.text) {
                 case '/start':
-                    new mongo.User({
-                        tg_id: receivedMsg.from.id,
-                        first_name: receivedMsg.from.first_name,
-                    })
-                        .save()
-                        .then(() => {
-                            if (!ENV.WELCOME) return
-                            bot.sendMessage(receivedMsg.chat.id, ENV.WELCOME, opt)
-                                .catch(e => console.log('send welcome message ERROR:\n', e))
-                        })
+                    if (!ENV.WELCOME) return
+                    bot.sendMessage(receivedMsg.chat.id, ENV.WELCOME, opt)
+                        .catch(e => console.log('send welcome message ERROR:\n', e))
                     break
                 default:
                     bot.sendMessage(receivedMsg.chat.id, '未找到命令', opt)
                         .catch(e => console.log('send command warn ERROR:\n', e))
             }
-            return
-        }
-
-        // 忽略黑名单用户消息
-        const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
-        if (fromUser && fromUser.is_banned) {
-            bot.sendMessage(receivedMsg.chat.id, '你已被封禁，将不再转发你的消息', opt)
-                .catch(e => console.log('send command warn ERROR:\n', e))
-            return
-        } else if (!fromUser) {
-            bot.sendMessage(receivedMsg.chat.id, '请先发送 /start', opt)
-                .catch(e => console.log('send command warn ERROR:\n', e))
             return
         }
 
@@ -76,34 +68,35 @@ bot.on('message', async receivedMsg => {
                 return
             }
 
+            // 找到目标消息，处理错误
+            const targetMsg = await mongo.Message.findOne({forwarded_message_id: receivedMsg.reply_to_message.message_id})
+            if (!targetMsg){
+                await bot.sendMessage(ENV.ME, `未找到操作对象，请检查回复对象是否正确`)
+                return
+            }
+
             // 通过被回复消息查询操作对象id
-            mongo.Message.findOne({forwarded_message_id: receivedMsg.reply_to_message.message_id})
-                .then(targetMsg => {
+            mongo.User.findOne({tg_id: targetMsg.from_id})
+                .then(async user => {
                     switch (receivedMsg.text) {
                         // 加入黑名单
                         case '!ban':
-                            mongo.User.findOne({tg_id: targetMsg.from_id})
-                                .then(async user => {
-                                    user.updateOne({is_banned: true})
-                                        .then(() => {
-                                            bot.sendMessage(ENV.ME, `用户[${user.first_name}](tg://user?id=${user.tg_id}) 已加入黑名单，他的消息将不再会转发。\n\n如需取消封禁请对该用户的消息回复 \`!unban\``, opt)
-                                                .catch(e => console.log('send command warn ERROR:\n', e))
-                                        })
-                                        .catch(e => console.log('add user to black list ERROR:\n', e))
+                            user.updateOne({is_banned: true})
+                                .then(() => {
+                                    bot.sendMessage(ENV.ME, `用户[${user.first_name}](tg://user?id=${user.tg_id}) 已加入黑名单，他的消息将不再会转发。\n\n如需取消封禁请对该用户的消息回复 \`!unban\``, opt)
+                                        .catch(e => console.log('send command warn ERROR:\n', e))
                                 })
+                                .catch(e => console.log('add user to black list ERROR:\n', e))
                             break
 
                         // 移出黑名单
                         case '!unban':
-                            mongo.User.findOne({tg_id: targetMsg.from_id})
-                                .then(async user => {
-                                    user.updateOne({is_banned: false})
-                                        .then(() => {
-                                            bot.sendMessage(ENV.ME, `用户[${user.first_name}](tg://user?id=${user.tg_id}) 已从黑名单移出`, opt)
-                                                .catch(e => console.log('send command warn ERROR:\n', e))
-                                        })
-                                        .catch(e => console.log('remove user from black list ERROR:\n', e))
+                            user.updateOne({is_banned: false})
+                                .then(() => {
+                                    bot.sendMessage(ENV.ME, `用户[${user.first_name}](tg://user?id=${user.tg_id}) 已从黑名单移出`, opt)
+                                        .catch(e => console.log('send command warn ERROR:\n', e))
                                 })
+                                .catch(e => console.log('remove user from black list ERROR:\n', e))
                             break
 
                         // 删除我的消息
@@ -115,7 +108,6 @@ bot.on('message', async receivedMsg => {
                                 .catch(e => console.log('send command warn ERROR:\n', e))
                     }
                 })
-                .catch(e => bot.sendMessage(ENV.ME, `未找到操作对象，请检查回复对象是否正确`))
             return
         }
     }
@@ -167,3 +159,4 @@ bot.on('message', async receivedMsg => {
             })
     }
 })
+
