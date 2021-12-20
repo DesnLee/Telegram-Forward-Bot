@@ -24,22 +24,6 @@ bot.on('message', async receivedMsg => {
     // 忽略非私聊消息
     if (receivedMsg.chat.type !== 'private') return
 
-    // 拦截黑名单用户消息，未入库用户录入数据库
-    const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
-    if (fromUser) {
-        if (fromUser.is_banned) {
-            bot.sendMessage(receivedMsg.chat.id, '你已被封禁，将不再转发你的消息', opt)
-                .catch(e => console.log('send command warn ERROR:\n', e))
-            return
-        }
-    } else {
-        new mongo.User({
-            tg_id: receivedMsg.from.id,
-            first_name: receivedMsg.from.first_name,
-        }).save()
-    }
-
-
     // 文字命令消息逻辑
     if (receivedMsg.text && /^[\/!].*$/g.test(receivedMsg.text)) {
 
@@ -110,6 +94,21 @@ bot.on('message', async receivedMsg => {
                 })
             return
         }
+    }
+
+    // 拦截黑名单用户消息，未入库用户录入数据库
+    const fromUser = await mongo.User.findOne({tg_id: receivedMsg.from.id})
+    if (fromUser) {
+        if (fromUser.is_banned) {
+            bot.sendMessage(receivedMsg.chat.id, '你已被封禁，将不再转发你的消息', opt)
+                .catch(e => console.log('send command warn ERROR:\n', e))
+            return
+        }
+    } else {
+        new mongo.User({
+            tg_id: receivedMsg.from.id,
+            first_name: receivedMsg.from.first_name,
+        }).save()
     }
 
     // 其他人发的非命令消息转发给自己
