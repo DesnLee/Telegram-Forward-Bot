@@ -7,7 +7,7 @@
     "test": "react-scripts test --env=jsdom",
     "lint": "eslint src",
     "lint:create": "eslint --init",
-    "build": "rm -rf dist && ncc build src/index.ts -m",
+    "build": "rm -rf dist && ncc build src/index.ts -m && cp -r src/env dist/",
     "start": "cd dist && node index.js"
   },
   "author": "desnlee",
