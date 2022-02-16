@@ -1,0 +1,23 @@
+# Please keep the following double quotes
+
+# Your mongodb address like 'mongodb://user:pwd@127.0.0.1:27017/ForwardBotDB'
+database_url : ""
+
+# The bot token that you get from BotFather
+bot_token :    ""
+
+# Your telegram number ID, no quotes like 123456789
+me :
+
+# Need notification, true / false
+notice :       true
+
+# Auto-reply message when the user sends the following commands, can use Markdown format
+msg :
+  start : "*Hello，welcome!*\n\nThis is my bot, and can forwards your messages to me"
+
+# 定义几种 form
+parse :
+  html : { parse_mode : 'HTML' }
+  mark : { parse_mode : 'Markdown' }
+  mark2 : { parse_mode : 'MarkdownV2' }
