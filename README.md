@@ -84,7 +84,7 @@ cd dist && node index.js
 - You can reply to the forwarded message to reply to the original message, currently supports text, stickers, photos.
 - Reply  `!ban` or `!unban` to a forwarded message will add/remove someone to the blacklist, and when someone is blacklisted, the bot will not forward his/her messages to you.
 - Reply  `!info` to a forwarded message will show you the userinfo whose sent the message.
-- Reply "!del" or "!del all" to a message you sent earlier and the message will
+- Reply `!del` or `!del all` to a message you sent earlier and the message will
   be deleted from the chat history between the bot and you and the sender of the
   message.
 - 
