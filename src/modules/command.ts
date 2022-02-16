@@ -6,7 +6,7 @@ export default async (receivedMsg: Message) => {
   const pre = receivedMsg.text?.[0];
   switch (pre) {
     case '/':
-      processSystemCmd(receivedMsg);
+      await processSystemCmd(receivedMsg);
       break;
     case '!':
       await processCustomerCmd(receivedMsg);

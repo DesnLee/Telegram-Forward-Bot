@@ -1,28 +1,18 @@
 import { readFileSync } from 'fs';
 import { load } from 'js-yaml';
 import { resolve } from 'path';
-import {
-  InlineKeyboardButton,
-  SendMessageOptions,
-  ParseMode,
-  InlineKeyboardMarkup,
-} from 'node-telegram-bot-api';
+import { SendMessageOptions, } from 'node-telegram-bot-api';
 
 interface Config {
   database_url: string;
   bot_token: string;
   me: number;
   notice: boolean;
-  msg: { start: string; help: string };
-  button: {
-    getUserInfo: InlineKeyboardButton[][];
-    sentence: InlineKeyboardButton[][];
-  };
+  msg: { start: string };
   parse: {
     html: SendMessageOptions;
     mark: SendMessageOptions;
     mark2: SendMessageOptions;
-    help: { parse_mode: ParseMode; reply_markup: InlineKeyboardMarkup };
   };
 }
 
