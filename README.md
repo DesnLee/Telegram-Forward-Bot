@@ -8,7 +8,7 @@ This project relies on [Node.js](https://github.com/nodesource/distributions/blo
 
 </div>
 
-## Start with single file
+# Start with single file
 
 If you just want to use this bot, you can choose to download 2 runtime files to
 use it.
