@@ -8,7 +8,9 @@ interface Config {
   bot_token: string;
   me: number;
   notice: boolean;
-  msg: { start: string };
+  msg: {
+    [key:string]:string
+  };
   parse: {
     html: SendMessageOptions;
     mark: SendMessageOptions;
